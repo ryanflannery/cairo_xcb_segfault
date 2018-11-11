@@ -2,6 +2,15 @@
  * Test demonstrating how a second call to cairo_xcb_surface_create() bombs.
  * Note I've stripped down most of the setup/etc to be as minimal as possible.
  * Error checking on all xcb/cairo calls previous show no errors when present.
+ *
+ * NOTE:
+ * This has been resolved! Many thanks to Uli Schlachter's great explanation
+ * and suggestions at:
+ * https://lists.cairographics.org/archives/cairo/2018-November/028791.html
+ *
+ * Basicaly the call to
+ *    cairo_device_finish(cairo_surface_get_device(cs));
+ * on line 69 resolves it.
  */
 #include <stdio.h>
 #include <unistd.h>
@@ -57,6 +66,7 @@ test()
    sleep(1);
 
    cairo_destroy(c);
+   cairo_device_finish(cairo_surface_get_device(cs)); /* XXX THIS FIXES IT! */
    cairo_surface_destroy(cs);
    xcb_destroy_window(x, w);
    xcb_disconnect(x);
